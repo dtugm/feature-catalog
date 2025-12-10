@@ -1,0 +1,36 @@
+{
+  "name": "feature-catalog",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@heroui/react": "^2.8.5",
+    "@types/papaparse": "^5.5.1",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.23.25",
+    "lucide-react": "^0.556.0",
+    "maplibre-gl": "^5.14.0",
+    "next": "14.2.33",
+    "next-themes": "^0.4.6",
+    "papaparse": "^5.5.3",
+    "react": "^18",
+    "react-dom": "^18",
+    "recharts": "^3.5.1",
+    "tailwind-merge": "^3.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.33",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  }
+}

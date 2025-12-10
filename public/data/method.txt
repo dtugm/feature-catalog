@@ -1,0 +1,179 @@
+﻿METODOLOGI ESTIMASI STOK KARBON DAN VALUASI EKONOMI
+Disusun oleh : 
+1. Fairuz Akmal Pradana (methodology)
+2. Aulia Nur Fajriyah (visualization)
+
+
+1. ESTIMASI STOK KARBON HUTAN
+1.1 Kerangka Kerja IPCC
+Penelitian ini mengadopsi pendekatan empat kolam karbon (four carbon pools) sesuai pedoman 2019 Refinement to the 2006 IPCC Guidelines for National Greenhouse Gas Inventories (IPCC, 2019). Total stok karbon hutan dihitung menggunakan formula:
+
+
+$$C_{total} = C_{above} + C_{below} + C_{soil} + C_{dead}$$
+Di mana:
+* $C_{above}$ = karbon biomassa di atas permukaan tanah (Mg C/ha);
+* $C_{below}$ = karbon biomassa di bawah permukaan tanah/akar (Mg C/ha);
+* $C_{soil}$ = karbon organik tanah 0-30 cm (Mg C/ha);
+* $C_{dead}$ = karbon bahan organik mati/serasah (Mg C/ha).
+1.2 Metode Integrasi Penginderaan Jauh dan Deep Learning
+A. Deteksi Tutupan Lahan dengan Model AI U-Net
+Klasifikasi tutupan lahan dilakukan menggunakan pendekatan Deep Learning dengan arsitektur U-Net (Ronneberger et al., 2015). U-Net dipilih karena keunggulannya dalam segmentasi semantis (semantic segmentation) yang mampu mempertahankan informasi lokasi spasial sekaligus menangkap konteks fitur melalui jalur contracting (encoder) dan expanding (decoder).
+Model dilatih menggunakan data citra multispektral Sentinel-2 untuk memisahkan kelas tutupan lahan (Hutan, Non-Hutan, Semak, dll). Hasil segmentasi U-Net digunakan sebagai basis spasial untuk menentukan parameter karbon tanah ($C_{soil}$) dan bahan organik mati ($C_{dead}$) sesuai tipe tutupan lahan.
+B. Estimasi Biomassa dari NDVI (Sentinel-2)
+Normalized Difference Vegetation Index (NDVI) dihitung dari citra Sentinel-2 Surface Reflectance menggunakan formula standar (Tucker, 1979):
+
+
+$$NDVI = \frac{\rho_{NIR} - \rho_{Red}}{\rho_{NIR} + \rho_{Red}}$$
+Biomassa di atas permukaan (AGB) diestimasi menggunakan model eksponensial yang dikalibrasi untuk hutan Dipterocarp Sumatera (Basuki et al., 2009):
+
+
+$$AGB_{Sentinel} = \exp(2.13 + 2.55 \times NDVI)$$
+dengan R² = 0.72 dan RMSE = 45.3 Mg/ha.
+C. Integrasi dengan Data Referensi WHRC
+Untuk mengurangi ketidakpastian, estimasi Sentinel-2 dikombinasikan dengan dataset biomassa pantropical Woods Hole Research Center (WHRC) resolusi 500m (Baccini et al., 2012) menggunakan weighted averaging:
+
+
+$$AGB_{combined} = 0.5 \times AGB_{Sentinel} + 0.5 \times AGB_{WHRC}$$
+D. Konversi Biomassa ke Karbon dan Estimasi Kolam Lain
+Biomassa dikonversi ke karbon menggunakan carbon fraction 0.47 (IPCC, 2019):
+
+
+$$C_{above} = AGB_{combined} \times 0.47$$
+Karbon biomassa bawah tanah diestimasi menggunakan root-to-shoot ratio 0.25 untuk hutan tropis (IPCC, 2019, Tabel 4.4):
+
+
+$$C_{below} = C_{above} \times 0.25$$
+Karbon tanah ($C_{soil}$) dan bahan organik mati ($C_{dead}$) diperoleh dari tabel densitas karbon IPCC 2019 Refinement untuk wilayah Tropical Asia (IPCC, 2019, Tabel 4.7, 4.9, 4.12) yang dipetakan berdasarkan klasifikasi tutupan lahan hasil model U-Net.
+Tabel 1. Densitas Karbon per Kelas Tutupan Lahan (IPCC, 2019)
+Kelas Tutupan Lahan
+	C_above
+	C_below
+	C_soil
+	C_dead
+	Total
+	Hutan (Tree Cover)
+	180
+	45
+	90
+	15
+	330
+	Semak (Shrubland)
+	40
+	10
+	75
+	5
+	130
+	Padang Rumput
+	15
+	7.5
+	80
+	2.5
+	105
+	Lahan Pertanian
+	5
+	2.5
+	65
+	0
+	72.5
+	Mangrove
+	150
+	37.5
+	100
+	12.5
+	300
+	Lahan Basah
+	30
+	15
+	100
+	10
+	155
+	Catatan: Semua nilai dalam Mg C/ha (megagram karbon per hektar)
+Untuk biomassa hasil penginderaan jauh, nilai $C_{above}$ dan $C_{below}$ menggunakan hasil integrasi Sentinel-2 dan WHRC, sedangkan $C_{soil}$ dan $C_{dead}$ menggunakan nilai IPCC default sesuai kelas tutupan lahan.
+1.3 Data dan Periode Analisis
+Analisis temporal dilakukan untuk periode 2020-2025 menggunakan:
+* Tutupan Lahan: Dihasilkan dari model U-Net menggunakan training data yang dirujuk dari ESA WorldCover v100/v200 (Zanaga et al., 2021) dan Google Dynamic World (Brown et al., 2022).
+* Biomassa: Sentinel-2 SR Harmonized (resolusi 10m, cloud cover <20%) dan WHRC Pantropical Biomass (resolusi 500m) (Baccini et al., 2012).
+Area of Interest (AOI) mencakup provinsi Aceh, Sumatera Utara, dan Sumatera Barat dengan total luas ~173,000 km². Analisis dilakukan menggunakan platform Google Earth Engine untuk komputasi cloud-based (Gorelick et al., 2017).
+________________
+2. VALUASI EKONOMI KARBON
+2.1 Konversi Karbon ke CO₂ Ekuivalen
+Stok karbon dikonversi ke CO₂ ekuivalen menggunakan faktor konversi stoikiometri standar IPCC (IPCC, 2006, Volume 1, Chapter 3):
+
+
+$$CO_{2e} = C_{stock} \times 3.67$$
+Di mana faktor 3.67 diperoleh dari rasio massa molekular CO₂ (44 g/mol) terhadap massa atom C (12 g/mol). Konversi ini diperlukan karena mekanisme perdagangan karbon dan pelaporan kepada UNFCCC menggunakan satuan CO₂ ekuivalen, bukan karbon elemental (UNFCCC, 2015).
+2.2 Perhitungan Nilai Ekonomi
+Nilai ekonomi karbon per hektar dihitung menggunakan formula:
+
+
+$$USD_{ha} = CO_{2e} \times P_{carbon}$$
+Di mana $P_{carbon}$ adalah harga karbon dalam USD per tonne CO₂e. Penelitian ini menggunakan empat skenario harga berdasarkan kondisi pasar karbon global (World Bank, 2023):
+Tabel 2. Skenario Harga Karbon
+Skenario
+	Harga (USD/tonne CO₂e)
+	Basis
+	Conservative
+	6.34
+	Rata-rata proyek REDD+ Asia-Pasifik 2020-2022
+	Moderate
+	15.00
+	Median voluntary carbon market global 2023
+	High
+	27.00
+	Proyek dengan co-benefits tinggi
+	Compliance
+	50.00
+	Rata-rata compliance market (EU ETS)
+	Skenario conservative (USD 6.34) dipilih sebagai baseline karena representatif untuk proyek REDD+ Indonesia dan konsisten dengan harga historis program REDD+ Indonesia-Norway (Government of Indonesia, 2020; Ecosystem Marketplace, 2023).
+2.3 Analisis Perubahan Temporal dan Total Regional
+Perubahan emisi/sekuestrasi karbon (2020-2025):
+
+
+$$\Delta CO_{2e} = CO_{2e,2025} - CO_{2e,2020}$$
+Nilai negatif menunjukkan emisi (deforestasi/degradasi), nilai positif menunjukkan sekuestrasi (reforestasi/pertumbuhan hutan).
+Perubahan nilai ekonomi:
+
+
+$$\Delta USD = \Delta CO_{2e} \times P_{carbon}$$
+Total nilai ekonomi regional:
+
+
+$$USD_{total} = \sum_{i=1}^{n} (CO_{2e,i} \times A_i) \times P_{carbon}$$
+Di mana $A_i$ adalah luas piksel i dalam hektar (0.09 ha untuk resolusi 30m).
+2.4 Implementasi Komputasi
+Algoritma valuasi diimplementasikan dalam Python dengan input data GeoJSON hasil ekstraksi Google Earth Engine. Untuk setiap feature/piksel:
+1. Konversi: $CO_{2e} = C_{stock} \times 3.67$ untuk setiap tahun (2020-2025).
+2. Valuasi: $USD_{ha} = CO_{2e} \times P_{carbon}$ sesuai skenario.
+3. Perubahan temporal: $\Delta CO_{2e}$ dan $\Delta USD$ untuk periode 2020-2025.
+4. Agregasi: Total CO₂e dan USD regional, rata-rata per hektar.
+Output mencakup properti tambahan: {year}_CO2e, {year}_USD_per_ha, CO2e_change_2020_2025, USD_change_2020_2025, dan metadata (carbon price, conversion factor, calculation date, price scenario).
+2.5 Ketidakpastian dan Aplikasi
+Sumber ketidakpastian:
+* Estimasi stok karbon: ±25-35% (error klasifikasi U-Net, model NDVI, variabilitas spasial) (Mitchard et al., 2013).
+* Harga karbon: ±50-100% (volatilitas pasar, perbedaan tipe proyek) (Ecosystem Marketplace, 2023).
+* Total ketidakpastian: ±60-110%.
+Aplikasi hasil valuasi:
+1. Baseline untuk proyek REDD+ sesuai framework UNFCCC (UNFCCC, 2015).
+2. Kontribusi terhadap Nationally Determined Contributions (NDC) Indonesia yang menargetkan pengurangan emisi 29-41% pada 2030 (Republik Indonesia, 2016).
+3. Identifikasi area prioritas konservasi berdasarkan nilai karbon tinggi.
+4. Analisis cost-benefit konservasi vs. konversi lahan.
+5. Komunikasi nilai ekonomi jasa ekosistem kepada stakeholder.
+Valuasi ini sesuai untuk screening awal dan perencanaan strategis, namun memerlukan verifikasi lapangan untuk transaksi carbon credits aktual sesuai standar Verified Carbon Standard (Verra, 2023).
+________________
+REFERENSI
+Baccini, A., Goetz, S. J., Walker, W. S., Laporte, N. T., Sun, M., Sulla-Menashe, D., Hackler, J., Beck, P. S. A., Dubayah, R., Friedl, M. A., Samanta, S., & Houghton, R. A. (2012). Estimated carbon dioxide emissions from tropical deforestation improved by carbon-density maps. Nature Climate Change, 2(3), 182-185. https://doi.org/10.1038/nclimate1354
+Basuki, T. M., van Laake, P. E., Skidmore, A. K., & Hussin, Y. A. (2009). Allometric equations for estimating the above-ground biomass in tropical lowland Dipterocarp forests. Forest Ecology and Management, 257(8), 1684-1694. https://doi.org/10.1016/j.foreco.2009.01.027
+Brown, C. F., Brumby, S. P., Guzder-Williams, B., Birch, T., Hyde, S. B., Mazzariello, J., Czerwinski, W., Pasquarella, V. J., Haertel, R., Ilyushchenko, S., Schwehr, K., Weisse, M., Stolle, F., Hanson, C., Guinan, O., Moore, R., & Tait, A. M. (2022). Dynamic World, near real-time global 10 m land use land cover mapping. Scientific Data, 9(1), 251. https://doi.org/10.1038/s41597-022-01307-4
+Ecosystem Marketplace. (2023). State of the voluntary carbon markets 2023. Forest Trends. https://www.ecosystemmarketplace.com/carbon-markets/
+Gorelick, N., Hancher, M., Dixon, M., Ilyushchenko, S., Thau, D., & Moore, R. (2017). Google Earth Engine: Planetary-scale geospatial analysis for everyone. Remote Sensing of Environment, 202, 18-27. https://doi.org/10.1016/j.rse.2017.06.031
+Government of Indonesia. (2020). Indonesia's REDD+ results and the Norway partnership. Ministry of Environment and Forestry.
+Intergovernmental Panel on Climate Change. (2006). 2006 IPCC Guidelines for National Greenhouse Gas Inventories, Volume 4: Agriculture, Forestry and Other Land Use. IPCC.
+Intergovernmental Panel on Climate Change. (2019). 2019 Refinement to the 2006 IPCC Guidelines for National Greenhouse Gas Inventories, Volume 4: Agriculture, Forestry and Other Land Use. IPCC.
+Mitchard, E. T., Saatchi, S. S., Baccini, A., Asner, G. P., Goetz, S. J., Harris, N. L., & Brown, S. (2013). Uncertainty in the spatial distribution of tropical forest biomass: A comparison of pan-tropical maps. Carbon Balance and Management, 8(1), 10. https://doi.org/10.1186/1750-0680-8-10
+Republik Indonesia. (2016). First nationally determined contribution Republic of Indonesia. Submitted to UNFCCC.
+Ronneberger, O., Fischer, P., & Brox, T. (2015). U-Net: Convolutional Networks for Biomedical Image Segmentation. Medical Image Computing and Computer-Assisted Intervention (MICCAI), 9351, 234–241. https://doi.org/10.1007/978-3-319-24574-4_28
+Tucker, C. J. (1979). Red and photographic infrared linear combinations for monitoring vegetation. Remote Sensing of Environment, 8(2), 127-150. https://doi.org/10.1016/0034-4257(79)90013-0
+United Nations Framework Convention on Climate Change. (2015). Adoption of the Paris Agreement. UNFCCC Decision 1/CP.21.
+Verra. (2023). VCS Standard, Version 4.5. Verified Carbon Standard.
+World Bank. (2023). State and trends of carbon pricing 2023. World Bank Group.
+Zanaga, D., et al. (2021). ESA WorldCover 10 m 2020 v100. European Space Agency.
