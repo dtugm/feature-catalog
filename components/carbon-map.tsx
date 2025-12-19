@@ -99,7 +99,7 @@ export const CarbonMap = ({
         ],
       },
       center: [98.726785, 2.638013],
-      zoom: 9,
+      zoom: 7,
     });
 
     map.current.addControl(new maplibregl.NavigationControl(), "top-right");
@@ -148,7 +148,7 @@ export const CarbonMap = ({
         map.current?.addSource("carbon-stock", {
           type: "raster",
           tiles: [
-            `https://digital-twin-ugm.s3.ap-southeast-1.amazonaws.com/carbon_stock/tiles/${year}/{z}/{x}/{y}.png`,
+            `https://digital-twin-ugm.s3.ap-southeast-1.amazonaws.com/carbon_stock/tiles2/${year}/{z}/{x}/{y}.png`,
           ],
           tileSize: 256,
           scheme: "tms",
@@ -265,7 +265,7 @@ export const CarbonMap = ({
           const coordinates = e.lngLat;
           map.current?.flyTo({
             center: coordinates,
-            zoom: 12,
+            zoom: 9,
             essential: true,
           });
         }
@@ -342,7 +342,7 @@ export const CarbonMap = ({
         map.current?.addSource("carbon-stock", {
           type: "raster",
           tiles: [
-            `https://digital-twin-ugm.s3.ap-southeast-1.amazonaws.com/carbon_stock/tiles/${year}/{z}/{x}/{y}.png`,
+            `https://digital-twin-ugm.s3.ap-southeast-1.amazonaws.com/carbon_stock/tiles2/${year}/{z}/{x}/{y}.png`,
           ],
           tileSize: 256,
           scheme: "tms",
